@@ -285,11 +285,14 @@ class Gateway:
             "Connected to portal: vendor=%#04x product=%#04x", device.idVendor, device.idProduct
         )
 
-        if self.auto_detach and device.is_kernel_driver_active(self.interface):
-            LOGGER.info("Detaching kernel driver from interface %s", self.interface)
-            device.detach_kernel_driver(self.interface)
-            self._reattach_driver = True
-
+        try:
+            if self.auto_detach and device.is_kernel_driver_active(self.interface):
+                LOGGER.info("Detaching kernel driver from interface %s", self.interface)
+                device.detach_kernel_driver(self.interface)
+                self._reattach_driver = True
+        except NotImplementedError:
+            pass
+            
         device.set_configuration()
         usb_util.claim_interface(device, self.interface)
         self.dev = device
